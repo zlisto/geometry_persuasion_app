@@ -6,9 +6,9 @@ import { computeManifold, sendChatMessage } from './services/api';
 
 function App() {
   const [messages, setMessages] = useState([]);
-  const [topic, setTopic] = useState("Diamonds");
+  const [topic, setTopic] = useState("Dunkin Donuts");
   const [systemTail, setSystemTail] = useState(
-    "You are a salesperson trying to convince someone on a cold call to purchase the given product. Be a charismatic salesperson, ask open-ended questions, and be informative. Don't be too pushy or verbose, try to find out about the customer and see how the product would fit into their life."
+    "You are a salesperson Dunkin trying to convince someone on a cold call to purchase the given product. Be a charismatic salesperson, ask open-ended questions, and be informative. Don't be too pushy or verbose, try to find out about the customer and see how the product would fit into their life."
   );
   const [manifoldData, setManifoldData] = useState(null);
   const [conversationPoints, setConversationPoints] = useState([]);
@@ -22,7 +22,7 @@ function App() {
     if (messages.length === 0) {
       const systemMessage = {
         role: "system",
-        content: `Your job is to do the following: ${topic}.\n\n${systemTail}`
+        content: `Your job is to do convince someone to support the following topic or item: ${topic}.  This is your description:\n\n${systemTail}`
       };
       setMessages([systemMessage]);
     }
