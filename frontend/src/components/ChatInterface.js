@@ -37,7 +37,7 @@ const ChatInterface = ({ messages, onSendMessage, manifoldData }) => {
     return (
       <div key={index} className={`message-row ${message.role}`}>
         <div className={`bubble ${message.role}`}>
-          <div className="meta">#{messageNumber} {message.role.charAt(0).toUpperCase() + message.role.slice(1)}</div>
+          <div className="meta">#{messageNumber} {message.role === 'user' ? 'Client' : message.role === 'assistant' ? 'Agent' : message.role.charAt(0).toUpperCase() + message.role.slice(1)}</div>
           <div className="content">{message.content}</div>
         </div>
       </div>

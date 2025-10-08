@@ -8,7 +8,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [topic, setTopic] = useState("Dunkin Donuts");
   const [systemTail, setSystemTail] = useState(
-    "You are a salesperson named Duncan trying to convince someone on a cold call to purchase the given product. Be a charismatic salesperson, ask open-ended questions, and be informative. Don't be too pushy or verbose, try to find out about the customer and see how the product would fit into their life."
+    "You are a salesperson named Duncan trying to convince someone on a cold call to purchase the given product. Be a charismatic salesperson, ask open-ended questions, and be informative. Don't be too pushy or verbose, try to find out about the customer and see how the product would fit into their life. Limit your response to 30 words maximum."
   );
   const [manifoldData, setManifoldData] = useState(null);
   const [conversationPoints, setConversationPoints] = useState([]);
@@ -50,8 +50,20 @@ function App() {
       };
       setMessages([systemMessage, assistantMessage]);
       
+      // Immediately add assistant conversation point for real-time plotting
+      const assistantMessageIndex = 1; // First assistant message
+      const assistantPoint = {
+        role: "assistant",
+        x: 0, // Placeholder - will be updated by backend
+        y: 0, // Placeholder - will be updated by backend
+        message_index: assistantMessageIndex,
+        message: initialResponse.response
+      };
+      setConversationPoints([assistantPoint]);
+      
       // Compute initial assistant point
       if (initialResponse.conversation_points && initialResponse.conversation_points.length > 0) {
+        // Replace placeholder with real coordinates
         setConversationPoints(initialResponse.conversation_points);
       }
       
@@ -75,6 +87,19 @@ function App() {
     setMessages(updatedMessages);
     console.log('🔍 DEBUG: Updated messages:', updatedMessages.map(m => ({ role: m.role, contentLength: m.content.length })));
     
+    // Immediately add user conversation point for real-time plotting
+    if (manifoldData) {
+      const userMessageIndex = updatedMessages.filter(m => m.role === 'user').length;
+      const userPoint = {
+        role: "user",
+        x: 0, // Placeholder - will be updated by backend
+        y: 0, // Placeholder - will be updated by backend
+        message_index: userMessageIndex,
+        message: userMessage
+      };
+      setConversationPoints(prev => [...prev, userPoint]);
+    }
+    
     // Send to backend for AI response and conversation points
     console.log('🔍 DEBUG: Sending chat message to backend...');
     try {
@@ -94,13 +119,53 @@ function App() {
       setMessages(finalMessages);
       console.log('🔍 DEBUG: Final messages after assistant response:', finalMessages.map(m => ({ role: m.role, contentLength: m.content.length })));
       
-      // Add all conversation points returned from backend
+      // Immediately add assistant conversation point for real-time plotting
+      if (manifoldData) {
+        const assistantMessageIndex = finalMessages.filter(m => m.role === 'assistant').length;
+        const assistantPoint = {
+          role: "assistant",
+          x: 0, // Placeholder - will be updated by backend
+          y: 0, // Placeholder - will be updated by backend
+          message_index: assistantMessageIndex,
+          message: response.response
+        };
+        setConversationPoints(prev => [...prev, assistantPoint]);
+      }
+      
+      // Add all conversation points returned from backend (these will have correct coordinates)
       if (response.conversation_points && response.conversation_points.length > 0) {
         console.log('🔍 DEBUG: Adding conversation points to state:', response.conversation_points);
         setConversationPoints(prev => {
-          const newPoints = [...prev, ...response.conversation_points];
-          console.log('🔍 DEBUG: New conversation points after backend response:', newPoints);
-          return newPoints;
+          // Replace placeholder points with real coordinates from backend
+          const realPoints = response.conversation_points;
+          const updatedPoints = [...prev];
+          
+          // Update the last user and assistant points with real coordinates
+          let userIndex = -1;
+          let assistantIndex = -1;
+          
+          for (let i = updatedPoints.length - 1; i >= 0; i--) {
+            if (updatedPoints[i].role === 'user' && userIndex === -1) {
+              userIndex = i;
+            }
+            if (updatedPoints[i].role === 'assistant' && assistantIndex === -1) {
+              assistantIndex = i;
+            }
+            if (userIndex !== -1 && assistantIndex !== -1) break;
+          }
+          
+          // Replace placeholder points with real coordinates
+          realPoints.forEach(realPoint => {
+            if (realPoint.role === 'user' && userIndex !== -1) {
+              updatedPoints[userIndex] = realPoint;
+            }
+            if (realPoint.role === 'assistant' && assistantIndex !== -1) {
+              updatedPoints[assistantIndex] = realPoint;
+            }
+          });
+          
+          console.log('🔍 DEBUG: New conversation points after backend response:', updatedPoints);
+          return updatedPoints;
         });
       } else {
         console.log('🔍 DEBUG: No conversation points returned from backend');
@@ -173,14 +238,14 @@ function App() {
   return (
     <div className="App">
       <div className="app-header">
-        <h1 className="app-title">Geometry of Persuasion</h1>
+        <h1 className="app-title">Geometry of Influence</h1>
       </div>
       <div className="app-container" ref={containerRef}>
         <div 
           className="left-panel" 
           style={{ width: `${leftPanelWidth}%` }}
         >
-          <h2>💬 Topic-Driven Persuasion Chat</h2>
+          <h2>💬 Topic-Driven Influence Chat</h2>
           <p className="subtitle">Enter a <strong>Topic</strong>. It will be prepended to the system prompt.</p>
           
           <div className="input-section">

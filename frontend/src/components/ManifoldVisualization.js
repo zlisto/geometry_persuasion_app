@@ -26,27 +26,27 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
       marker: { size: 10, color: '#ff69b4' },
       name: 'Messages',
       customdata: roles.map((role, i) => [role, texts[i]]),
-      hovertemplate: 'Message %{x}<br>%{customdata[0]}: %{customdata[1]}<extra></extra>'
+      hovertemplate: 'Message %{x}<br>%{customdata[0] === "user" ? "Client" : customdata[0] === "assistant" ? "Agent" : customdata[0]}: %{customdata[1]}<extra></extra>'
     }];
 
     const layout = {
-      title: { text: 'Conversation — Messages by Index', font: { size: 28, color: '#ff69b4' } },
+      title: { text: 'Conversation — Messages by Index', font: { size: 28, color: 'black' } },
       xaxis: { 
-        title: { text: 'Message index', font: { size: 22, color: '#ff69b4' } },
+        title: { text: 'Message index', font: { size: 22, color: 'black' } },
         showgrid: true,
-        gridcolor: 'rgba(255,105,180,0.25)',
-        zerolinecolor: '#ff69b4'
+        gridcolor: 'rgba(0,0,0,0.1)',
+        zerolinecolor: 'black'
       },
       yaxis: { 
-        title: { text: 'Message index', font: { size: 22, color: '#ff69b4' } },
+        title: { text: 'Message index', font: { size: 22, color: 'black' } },
         showgrid: true,
-        gridcolor: 'rgba(255,105,180,0.25)',
-        zerolinecolor: '#ff69b4'
+        gridcolor: 'rgba(0,0,0,0.1)',
+        zerolinecolor: 'black'
       },
       template: 'plotly_white',
-      paper_bgcolor: '#000000',
-      plot_bgcolor: '#000000',
-      font: { size: 20, color: '#ff69b4' },
+      paper_bgcolor: 'white',
+      plot_bgcolor: 'white',
+      font: { size: 20, color: 'black' },
       margin: { l: 40, r: 20, t: 60, b: 40 },
       height: 600
     };
@@ -74,23 +74,23 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     showlegend: false
   });
 
-  // Add v0 point (red)
+  // Add v0 point (blue)
   data.push({
     x: [manifoldData.x0],
     y: [manifoldData.y0],
     mode: 'markers',
-    marker: { size: 15, color: 'red', symbol: 'x' },
+    marker: { size: 15, color: 'blue', symbol: 'x' },
     name: '1/100 Sentiment',
     hovertemplate: '1/100 Sentiment: (%{x:.2f}, %{y:.2f})<extra></extra>',
     showlegend: false
   });
 
-  // Add v1 point (blue)
+  // Add v1 point (red)
   data.push({
     x: [manifoldData.x1],
     y: [manifoldData.y1],
     mode: 'markers',
-    marker: { size: 15, color: 'blue', symbol: 'x' },
+    marker: { size: 15, color: 'red', symbol: 'x' },
     name: '100/100 Sentiment',
     hovertemplate: '100/100 Sentiment: (%{x:.2f}, %{y:.2f})<extra></extra>',
     showlegend: false
@@ -100,9 +100,9 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
   if (conversationPoints && conversationPoints.length > 0) {
     console.log('🔍 DEBUG: Processing conversation points:', conversationPoints);
     
-    // Separate user and assistant points
-    const userPoints = conversationPoints.filter(point => point.role === 'user');
-    const assistantPoints = conversationPoints.filter(point => point.role === 'assistant');
+    // Separate user and assistant points, filtering out placeholder points (x=0, y=0)
+    const userPoints = conversationPoints.filter(point => point.role === 'user' && (point.x !== 0 || point.y !== 0));
+    const assistantPoints = conversationPoints.filter(point => point.role === 'assistant' && (point.x !== 0 || point.y !== 0));
     
     console.log('🔍 DEBUG: Separated points:', {
       userPoints: userPoints.length,
@@ -111,36 +111,42 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
       assistantPointsData: assistantPoints
     });
 
-    // Add user points
+    // Add user points (only real coordinates)
     if (userPoints.length > 0) {
         console.log('🔍 DEBUG: Adding user points to plot data');
         data.push({
           x: userPoints.map(point => point.x),
           y: userPoints.map(point => point.y),
-          mode: 'lines+markers',
-          line: { width: 2, color: 'magenta', dash: 'solid' },
-          marker: { size: 10, color: 'magenta', symbol: 'circle' },
-          name: 'User Messages',
+          mode: 'lines+markers+text',
+          line: { width: 2, color: 'skyblue', dash: 'solid' },
+          marker: { size: 20, color: 'green', symbol: 'circle' },
+          text: userPoints.map(point => point.message_index.toString()),
+          textposition: 'middle center',
+          textfont: { color: '#000000', size: 14, family: 'Arial, sans-serif' },
+          name: 'Client Messages',
           customdata: userPoints.map(point => point.message_index),
-          hovertemplate: 'Message %{customdata}: User<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
+          hovertemplate: 'Message %{customdata}: Client<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
           showlegend: false
         });
     } else {
       console.log('🔍 DEBUG: No user points to add');
     }
 
-    // Add assistant points
+    // Add assistant points (only real coordinates)
     if (assistantPoints.length > 0) {
       console.log('🔍 DEBUG: Adding assistant points to plot data');
       data.push({
         x: assistantPoints.map(point => point.x),
         y: assistantPoints.map(point => point.y),
-        mode: 'lines+markers',
-        line: { width: 2, color: 'green', dash: 'solid' },
-        marker: { size: 10, color: 'green', symbol: 'square' },
-        name: 'Assistant Messages',
+        mode: 'lines+markers+text',
+        line: { width: 2, color: 'orange', dash: 'solid' },
+          marker: { size: 20, color: 'darkorange', symbol: 'square' },
+        text: assistantPoints.map(point => point.message_index.toString()),
+        textposition: 'middle center',
+        textfont: { color: '#000000', size: 14, family: 'Arial, sans-serif' },
+        name: 'Agent Messages',
         customdata: assistantPoints.map(point => point.message_index),
-          hovertemplate: 'Message %{customdata}: Assistant<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
+          hovertemplate: 'Message %{customdata}: Agent<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
         showlegend: false
       });
     } else {
@@ -151,25 +157,25 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
   }
 
   const layout = {
-    title: { text: 'Topic Manifold', font: { size: 28, color: '#ff69b4' } },
+    title: { text: 'Topic Manifold', font: { size: 28, color: 'black' } },
     xaxis: { 
-      title: { text: 'Sentiment', font: { size: 22, color: '#ff69b4' } },
+      title: { text: 'Sentiment', font: { size: 22, color: 'black' } },
       range: [-1.1, 1.1],
       showgrid: true,
-      gridcolor: 'rgba(255,105,180,0.25)',
-      zerolinecolor: '#ff69b4'
+      gridcolor: 'rgba(0,0,0,0.1)',
+      zerolinecolor: 'black'
     },
     yaxis: { 
-      title: { text: 'Relevance', font: { size: 22, color: '#ff69b4' } },
+      title: { text: 'Relevance', font: { size: 22, color: 'black' } },
       range: [0, 1.1],
       showgrid: true,
-      gridcolor: 'rgba(255,105,180,0.25)',
-      zerolinecolor: '#ff69b4'
+      gridcolor: 'rgba(0,0,0,0.1)',
+      zerolinecolor: 'black'
     },
     template: 'plotly_white',
-    paper_bgcolor: '#000000',
-    plot_bgcolor: '#000000',
-    font: { size: 20, color: '#ff69b4' },
+    paper_bgcolor: 'white',
+    plot_bgcolor: 'white',
+    font: { size: 20, color: 'black' },
     margin: { l: 40, r: 20, t: 60, b: 40 },
     height: 600,
     showlegend: false,
