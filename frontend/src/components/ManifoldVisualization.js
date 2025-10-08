@@ -74,7 +74,8 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     mode: 'markers',
     marker: { size: 15, color: 'red', symbol: 'x' },
     name: '1/100 Sentiment',
-    hovertemplate: '1/100 Sentiment: (%{x:.2f}, %{y:.2f})<extra></extra>'
+    hovertemplate: '1/100 Sentiment: (%{x:.2f}, %{y:.2f})<extra></extra>',
+    showlegend: false
   });
 
   // Add v1 point (blue)
@@ -84,7 +85,8 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     mode: 'markers',
     marker: { size: 15, color: 'blue', symbol: 'x' },
     name: '100/100 Sentiment',
-    hovertemplate: '100/100 Sentiment: (%{x:.2f}, %{y:.2f})<extra></extra>'
+    hovertemplate: '100/100 Sentiment: (%{x:.2f}, %{y:.2f})<extra></extra>',
+    showlegend: false
   });
 
   // Add conversation points
@@ -95,16 +97,17 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
 
     // Add user points
     if (userPoints.length > 0) {
-      data.push({
-        x: userPoints.map(point => point.x),
-        y: userPoints.map(point => point.y),
-        mode: 'lines+markers',
-        line: { width: 2, color: 'orange', dash: 'solid' },
-        marker: { size: 10, color: 'orange', symbol: 'circle' },
-        name: 'User Messages',
-        customdata: userPoints.map(point => point.message_index),
-        hovertemplate: 'Message %{customdata}: User<br>(%{x:.2f}, %{y:.2f})<extra></extra>'
-      });
+        data.push({
+          x: userPoints.map(point => point.x),
+          y: userPoints.map(point => point.y),
+          mode: 'lines+markers',
+          line: { width: 2, color: 'orange', dash: 'solid' },
+          marker: { size: 10, color: 'orange', symbol: 'circle' },
+          name: 'User Messages',
+          customdata: userPoints.map(point => point.message_index),
+          hovertemplate: 'Message %{customdata}: User<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
+          showlegend: false
+        });
     }
 
     // Add assistant points
@@ -117,7 +120,8 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
         marker: { size: 10, color: 'green', symbol: 'square' },
         name: 'Assistant Messages',
         customdata: assistantPoints.map(point => point.message_index),
-        hovertemplate: 'Message %{customdata}: Assistant<br>(%{x:.2f}, %{y:.2f})<extra></extra>'
+        hovertemplate: 'Message %{customdata}: Assistant<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
+        showlegend: false
       });
     }
   }
@@ -143,15 +147,14 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     plot_bgcolor: '#000000',
     font: { size: 20, color: '#ff69b4' },
     margin: { l: 40, r: 20, t: 60, b: 40 },
-    height: 600
+    height: '100%',
+    showlegend: false,
+    autosize: true
   };
 
   return (
     <div className="manifold-container">
-      <Plot data={data} layout={layout} useResizeHandler={true} style={{ width: '100%' }} />
-      <div className="manifold-info">
-        Manifold: red (1/100 sentiment), blue (100/100 sentiment), pink dots (conversation points: {conversationPoints.length})
-      </div>
+      <Plot data={data} layout={layout} useResizeHandler={true} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 };
