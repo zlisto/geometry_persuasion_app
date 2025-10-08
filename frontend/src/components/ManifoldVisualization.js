@@ -119,7 +119,7 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
           y: userPoints.map(point => point.y),
           mode: 'lines+markers+text',
           line: { width: 2, color: 'skyblue', dash: 'solid' },
-          marker: { size: 20, color: 'green', symbol: 'circle' },
+          marker: { size: 20, color: 'skyblue', symbol: 'circle' },
           text: userPoints.map(point => point.message_index.toString()),
           textposition: 'middle center',
           textfont: { color: '#000000', size: 14, family: 'Arial, sans-serif' },

@@ -30,9 +30,16 @@ const ChatInterface = ({ messages, onSendMessage, manifoldData }) => {
     if (message.role === 'system') return null;
     
     const isUser = message.role === 'user';
-    const messageNumber = messages
+    let messageNumber = messages
       .filter(m => m.role === message.role)
-      .indexOf(message) + 1;
+      .indexOf(message);
+    
+    // For assistant messages, start from 0 instead of 1
+    if (message.role === 'assistant') {
+      messageNumber = messageNumber; // Keep 0-based indexing
+    } else {
+      messageNumber = messageNumber + 1; // Keep 1-based indexing for user
+    }
     
     return (
       <div key={index} className={`message-row ${message.role}`}>

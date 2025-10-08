@@ -50,21 +50,19 @@ function App() {
       };
       setMessages([systemMessage, assistantMessage]);
       
-      // Immediately add assistant conversation point for real-time plotting
-      const assistantMessageIndex = 1; // First assistant message
-      const assistantPoint = {
-        role: "assistant",
-        x: 0, // Placeholder - will be updated by backend
-        y: 0, // Placeholder - will be updated by backend
-        message_index: assistantMessageIndex,
-        message: initialResponse.response
-      };
-      setConversationPoints([assistantPoint]);
-      
-      // Compute initial assistant point
+      // Plot the initial assistant message immediately
       if (initialResponse.conversation_points && initialResponse.conversation_points.length > 0) {
-        // Replace placeholder with real coordinates
         setConversationPoints(initialResponse.conversation_points);
+      } else {
+        // If no conversation points returned, create a placeholder point for the initial agent message
+        const initialAgentPoint = {
+          role: "assistant",
+          x: 0.5, // Place at center of manifold
+          y: 0.5,
+          message_index: 0,
+          message: initialResponse.response
+        };
+        setConversationPoints([initialAgentPoint]);
       }
       
     } catch (error) {
@@ -87,19 +85,6 @@ function App() {
     setMessages(updatedMessages);
     console.log('🔍 DEBUG: Updated messages:', updatedMessages.map(m => ({ role: m.role, contentLength: m.content.length })));
     
-    // Immediately add user conversation point for real-time plotting
-    if (manifoldData) {
-      const userMessageIndex = updatedMessages.filter(m => m.role === 'user').length;
-      const userPoint = {
-        role: "user",
-        x: 0, // Placeholder - will be updated by backend
-        y: 0, // Placeholder - will be updated by backend
-        message_index: userMessageIndex,
-        message: userMessage
-      };
-      setConversationPoints(prev => [...prev, userPoint]);
-    }
-    
     // Send to backend for AI response and conversation points
     console.log('🔍 DEBUG: Sending chat message to backend...');
     try {
@@ -119,53 +104,13 @@ function App() {
       setMessages(finalMessages);
       console.log('🔍 DEBUG: Final messages after assistant response:', finalMessages.map(m => ({ role: m.role, contentLength: m.content.length })));
       
-      // Immediately add assistant conversation point for real-time plotting
-      if (manifoldData) {
-        const assistantMessageIndex = finalMessages.filter(m => m.role === 'assistant').length;
-        const assistantPoint = {
-          role: "assistant",
-          x: 0, // Placeholder - will be updated by backend
-          y: 0, // Placeholder - will be updated by backend
-          message_index: assistantMessageIndex,
-          message: response.response
-        };
-        setConversationPoints(prev => [...prev, assistantPoint]);
-      }
-      
-      // Add all conversation points returned from backend (these will have correct coordinates)
+      // Plot all conversation points immediately as they're generated
       if (response.conversation_points && response.conversation_points.length > 0) {
         console.log('🔍 DEBUG: Adding conversation points to state:', response.conversation_points);
         setConversationPoints(prev => {
-          // Replace placeholder points with real coordinates from backend
-          const realPoints = response.conversation_points;
-          const updatedPoints = [...prev];
-          
-          // Update the last user and assistant points with real coordinates
-          let userIndex = -1;
-          let assistantIndex = -1;
-          
-          for (let i = updatedPoints.length - 1; i >= 0; i--) {
-            if (updatedPoints[i].role === 'user' && userIndex === -1) {
-              userIndex = i;
-            }
-            if (updatedPoints[i].role === 'assistant' && assistantIndex === -1) {
-              assistantIndex = i;
-            }
-            if (userIndex !== -1 && assistantIndex !== -1) break;
-          }
-          
-          // Replace placeholder points with real coordinates
-          realPoints.forEach(realPoint => {
-            if (realPoint.role === 'user' && userIndex !== -1) {
-              updatedPoints[userIndex] = realPoint;
-            }
-            if (realPoint.role === 'assistant' && assistantIndex !== -1) {
-              updatedPoints[assistantIndex] = realPoint;
-            }
-          });
-          
-          console.log('🔍 DEBUG: New conversation points after backend response:', updatedPoints);
-          return updatedPoints;
+          const newPoints = [...prev, ...response.conversation_points];
+          console.log('🔍 DEBUG: New conversation points after backend response:', newPoints);
+          return newPoints;
         });
       } else {
         console.log('🔍 DEBUG: No conversation points returned from backend');
