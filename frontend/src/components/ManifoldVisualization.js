@@ -2,8 +2,6 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 
 const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) => {
-  console.log('ManifoldVisualization received conversationPoints:', conversationPoints);
-  
   if (!manifoldData) {
     // Show simple conversation plot when no manifold data
     const turns = messages.filter(m => m.role === 'user' || m.role === 'assistant');
@@ -96,13 +94,9 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     // Separate user and assistant points
     const userPoints = conversationPoints.filter(point => point.role === 'user');
     const assistantPoints = conversationPoints.filter(point => point.role === 'assistant');
-    
-    console.log('Filtered userPoints:', userPoints);
-    console.log('Filtered assistantPoints:', assistantPoints);
 
     // Add user points
     if (userPoints.length > 0) {
-        console.log('Adding user points to plot:', userPoints);
         data.push({
           x: userPoints.map(point => point.x),
           y: userPoints.map(point => point.y),
@@ -114,8 +108,6 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
           hovertemplate: 'Message %{customdata}: User<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
           showlegend: false
         });
-    } else {
-        console.log('No user points to add');
     }
 
     // Add assistant points
@@ -155,7 +147,7 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     plot_bgcolor: '#000000',
     font: { size: 20, color: '#ff69b4' },
     margin: { l: 40, r: 20, t: 60, b: 40 },
-    height: '100%',
+    height: 600,
     showlegend: false,
     autosize: true
   };
