@@ -10,10 +10,12 @@ services:
         sync: false
     healthCheckPath: /
     
-  - type: static
+  - type: web
     name: geometry-persuasion-frontend
+    env: static
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: ./frontend/build
+    plan: free
     envVars:
       - key: REACT_APP_API_URL
         value: https://geometry-persuasion-backend.onrender.com
