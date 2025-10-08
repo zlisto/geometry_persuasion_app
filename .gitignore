@@ -298,7 +298,7 @@ backend/env/
 *.sqlite
 
 # Plotly
-*.html
+# *.html (commented out to allow frontend/public/index.html)
 
 # Temporary files
 *.tmp
