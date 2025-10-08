@@ -2,6 +2,8 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 
 const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) => {
+  console.log('ManifoldVisualization received conversationPoints:', conversationPoints);
+  
   if (!manifoldData) {
     // Show simple conversation plot when no manifold data
     const turns = messages.filter(m => m.role === 'user' || m.role === 'assistant');

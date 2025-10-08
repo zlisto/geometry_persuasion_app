@@ -75,14 +75,21 @@ function App() {
     // Compute conversation point for user message
     if (manifoldData) {
       try {
+        console.log('Computing user conversation point...');
         const userPoints = updatedMessages.filter(m => m.role === "user");
+        console.log('User messages:', userPoints);
         const userConversationPoint = await computeConversationPoint(
           updatedMessages, 
           manifoldData, 
           "user"
         );
+        console.log('User conversation point:', userConversationPoint);
         if (userConversationPoint) {
-          setConversationPoints(prev => [...prev, userConversationPoint]);
+          setConversationPoints(prev => {
+            const newPoints = [...prev, userConversationPoint];
+            console.log('Updated conversation points:', newPoints);
+            return newPoints;
+          });
         }
       } catch (error) {
         console.error('Error computing user conversation point:', error);
