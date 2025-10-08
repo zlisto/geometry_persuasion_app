@@ -43,7 +43,7 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
         gridcolor: 'rgba(255,105,180,0.25)',
         zerolinecolor: '#ff69b4'
       },
-      template: 'plotly_dark',
+      template: 'plotly_white',
       paper_bgcolor: '#000000',
       plot_bgcolor: '#000000',
       font: { size: 20, color: '#ff69b4' },
@@ -118,8 +118,8 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
           x: userPoints.map(point => point.x),
           y: userPoints.map(point => point.y),
           mode: 'lines+markers',
-          line: { width: 2, color: 'orange', dash: 'solid' },
-          marker: { size: 10, color: 'orange', symbol: 'circle' },
+          line: { width: 2, color: 'magenta', dash: 'solid' },
+          marker: { size: 10, color: 'magenta', symbol: 'circle' },
           name: 'User Messages',
           customdata: userPoints.map(point => point.message_index),
           hovertemplate: 'Message %{customdata}: User<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
@@ -140,7 +140,7 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
         marker: { size: 10, color: 'green', symbol: 'square' },
         name: 'Assistant Messages',
         customdata: assistantPoints.map(point => point.message_index),
-        hovertemplate: 'Message %{customdata}: Assistant<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
+          hovertemplate: 'Message %{customdata}: Assistant<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
         showlegend: false
       });
     } else {
@@ -166,7 +166,7 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
       gridcolor: 'rgba(255,105,180,0.25)',
       zerolinecolor: '#ff69b4'
     },
-    template: 'plotly_dark',
+    template: 'plotly_white',
     paper_bgcolor: '#000000',
     plot_bgcolor: '#000000',
     font: { size: 20, color: '#ff69b4' },
