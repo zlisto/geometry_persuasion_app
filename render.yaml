@@ -10,12 +10,3 @@ services:
       - key: OPENAI_API_KEY
         sync: false
     healthCheckPath: /
-
-  - type: static_site
-    name: geometry-persuasion-frontend
-    rootDir: frontend
-    buildCommand: npm ci && npm run build
-    staticPublishPath: build
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://geometry-persuasion-backend.onrender.com
