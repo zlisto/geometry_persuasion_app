@@ -2,20 +2,20 @@ services:
   - type: web
     name: geometry-persuasion-backend
     env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     plan: starter
-    buildCommand: "cd backend && pip install -r requirements.txt"
-    startCommand: "cd backend && python main.py"
     envVars:
       - key: OPENAI_API_KEY
         sync: false
     healthCheckPath: /
-    
-  - type: web
+
+  - type: static_site
     name: geometry-persuasion-frontend
-    env: static
-    buildCommand: "cd frontend && npm install && npm run build"
-    staticPublishPath: ./frontend/build
-    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
     envVars:
       - key: REACT_APP_API_URL
         value: https://geometry-persuasion-backend.onrender.com
