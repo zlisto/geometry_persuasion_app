@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import ChatInterface from './components/ChatInterface';
 import ManifoldVisualization from './components/ManifoldVisualization';
-import { computeManifold, sendChatMessage, computeConversationPoint } from './services/api';
+import { computeManifold, sendChatMessage } from './services/api';
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -51,8 +51,8 @@ function App() {
       setMessages([systemMessage, assistantMessage]);
       
       // Compute initial assistant point
-      if (initialResponse.conversation_point) {
-        setConversationPoints([initialResponse.conversation_point]);
+      if (initialResponse.conversation_points && initialResponse.conversation_points.length > 0) {
+        setConversationPoints(initialResponse.conversation_points);
       }
       
     } catch (error) {
@@ -64,6 +64,8 @@ function App() {
   };
 
   const handleSendMessage = async (userMessage) => {
+    console.log('🔍 DEBUG: handleSendMessage called with:', userMessage);
+    
     const newUserMessage = {
       role: "user",
       content: userMessage
@@ -71,34 +73,18 @@ function App() {
     
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
+    console.log('🔍 DEBUG: Updated messages:', updatedMessages.map(m => ({ role: m.role, contentLength: m.content.length })));
     
-    // Compute conversation point for user message
-    if (manifoldData) {
-      try {
-        console.log('Computing user conversation point...');
-        const userPoints = updatedMessages.filter(m => m.role === "user");
-        console.log('User messages:', userPoints);
-        const userConversationPoint = await computeConversationPoint(
-          updatedMessages, 
-          manifoldData, 
-          "user"
-        );
-        console.log('User conversation point:', userConversationPoint);
-        if (userConversationPoint) {
-          setConversationPoints(prev => {
-            const newPoints = [...prev, userConversationPoint];
-            console.log('Updated conversation points:', newPoints);
-            return newPoints;
-          });
-        }
-      } catch (error) {
-        console.error('Error computing user conversation point:', error);
-      }
-    }
-    
-    // Send to backend for AI response
+    // Send to backend for AI response and conversation points
+    console.log('🔍 DEBUG: Sending chat message to backend...');
     try {
       const response = await sendChatMessage(updatedMessages, manifoldData);
+      console.log('🔍 DEBUG: Chat response received:', {
+        responseLength: response.response?.length,
+        conversationPointsCount: response.conversation_points?.length || 0,
+        conversationPoints: response.conversation_points
+      });
+      
       const assistantMessage = {
         role: "assistant",
         content: response.response
@@ -106,14 +92,25 @@ function App() {
       
       const finalMessages = [...updatedMessages, assistantMessage];
       setMessages(finalMessages);
+      console.log('🔍 DEBUG: Final messages after assistant response:', finalMessages.map(m => ({ role: m.role, contentLength: m.content.length })));
       
-      // Compute conversation point for assistant message
-      if (manifoldData && response.conversation_point) {
-        setConversationPoints(prev => [...prev, response.conversation_point]);
+      // Add all conversation points returned from backend
+      if (response.conversation_points && response.conversation_points.length > 0) {
+        console.log('🔍 DEBUG: Adding conversation points to state:', response.conversation_points);
+        setConversationPoints(prev => {
+          const newPoints = [...prev, ...response.conversation_points];
+          console.log('🔍 DEBUG: New conversation points after backend response:', newPoints);
+          return newPoints;
+        });
+      } else {
+        console.log('🔍 DEBUG: No conversation points returned from backend');
       }
       
     } catch (error) {
-      console.error('Error getting AI response:', error);
+      console.error('❌ ERROR: Error getting AI response:', error);
+      console.error('❌ ERROR: Error details:', error.message);
+      console.error('❌ ERROR: Error response:', error.response?.data);
+      
       const errorMessage = {
         role: "assistant",
         content: "Sorry, I encountered an error. Please try again."

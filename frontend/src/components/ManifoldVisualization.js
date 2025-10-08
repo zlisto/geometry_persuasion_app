@@ -2,6 +2,13 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 
 const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) => {
+  console.log('🔍 DEBUG: ManifoldVisualization render:', {
+    hasManifoldData: !!manifoldData,
+    conversationPointsCount: conversationPoints?.length || 0,
+    conversationPoints: conversationPoints,
+    messagesCount: messages?.length || 0
+  });
+  
   if (!manifoldData) {
     // Show simple conversation plot when no manifold data
     const turns = messages.filter(m => m.role === 'user' || m.role === 'assistant');
@@ -91,12 +98,22 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
 
   // Add conversation points
   if (conversationPoints && conversationPoints.length > 0) {
+    console.log('🔍 DEBUG: Processing conversation points:', conversationPoints);
+    
     // Separate user and assistant points
     const userPoints = conversationPoints.filter(point => point.role === 'user');
     const assistantPoints = conversationPoints.filter(point => point.role === 'assistant');
+    
+    console.log('🔍 DEBUG: Separated points:', {
+      userPoints: userPoints.length,
+      assistantPoints: assistantPoints.length,
+      userPointsData: userPoints,
+      assistantPointsData: assistantPoints
+    });
 
     // Add user points
     if (userPoints.length > 0) {
+        console.log('🔍 DEBUG: Adding user points to plot data');
         data.push({
           x: userPoints.map(point => point.x),
           y: userPoints.map(point => point.y),
@@ -108,10 +125,13 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
           hovertemplate: 'Message %{customdata}: User<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
           showlegend: false
         });
+    } else {
+      console.log('🔍 DEBUG: No user points to add');
     }
 
     // Add assistant points
     if (assistantPoints.length > 0) {
+      console.log('🔍 DEBUG: Adding assistant points to plot data');
       data.push({
         x: assistantPoints.map(point => point.x),
         y: assistantPoints.map(point => point.y),
@@ -123,7 +143,11 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
         hovertemplate: 'Message %{customdata}: Assistant<br>(%{x:.2f}, %{y:.2f})<extra></extra>',
         showlegend: false
       });
+    } else {
+      console.log('🔍 DEBUG: No assistant points to add');
     }
+  } else {
+    console.log('🔍 DEBUG: No conversation points to process');
   }
 
   const layout = {
