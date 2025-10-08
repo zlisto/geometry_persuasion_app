@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: geometry-persuasion-backend
+    env: python
+    plan: free
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && python main.py"
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+    healthCheckPath: /
+    
+  - type: web
+    name: geometry-persuasion-frontend
+    env: static
+    plan: free
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: ./frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://geometry-persuasion-backend.onrender.com
