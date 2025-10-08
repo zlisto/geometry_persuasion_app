@@ -12,7 +12,19 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
   if (!manifoldData) {
     // Show simple conversation plot when no manifold data
     const turns = messages.filter(m => m.role === 'user' || m.role === 'assistant');
-    const n = Math.max(turns.length, 1);
+    
+    // Only show plot if there are actual messages
+    if (turns.length === 0) {
+      return (
+        <div className="manifold-container">
+          <div className="manifold-info">
+            Click 'Compute Topic Manifold' to visualize the topic's persuasion space.
+          </div>
+        </div>
+      );
+    }
+    
+    const n = turns.length;
     const xVals = Array.from({ length: n }, (_, i) => i + 1);
     const yVals = xVals.slice();
     const roles = turns.map(m => m.role);
