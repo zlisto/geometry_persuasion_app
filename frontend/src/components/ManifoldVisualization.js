@@ -172,7 +172,7 @@ const ManifoldVisualization = ({ manifoldData, conversationPoints, messages }) =
     title: { text: 'Topic Manifold', font: { size: 28, color: 'black' } },
     xaxis: { 
       title: { text: 'Sentiment', font: { size: 22, color: 'black' } },
-      range: [-1.1, 1.1],
+      range: [-0.3, 1.3],
       showgrid: true,
       gridcolor: 'rgba(0,0,0,0.1)',
       zerolinecolor: 'black'

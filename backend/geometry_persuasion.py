@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 import numpy as np
+import math
 from ast import literal_eval
 from openai import OpenAI
 import dotenv
@@ -46,9 +47,35 @@ def get_manifold_vectors(topic:str, model='gpt-4o'):
     return vector_0, vector_1
 
 
+def angle_between(v0, v1):
+    """Return the angle (radians) between v0 and v1."""
+    v0, v1 = np.array(v0), np.array(v1)
+    cos_theta = np.dot(v0, v1) / (np.linalg.norm(v0) * np.linalg.norm(v1))
+    return np.arccos(np.clip(cos_theta, -1.0, 1.0))
 
+def projection_matrix(basis_vectors):
+    """Projection matrix for subspace spanned by basis_vectors."""
+    A = np.column_stack(basis_vectors)
+    return A @ np.linalg.inv(A.T @ A) @ A.T
 
-def manifold_coords(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
+def projection_coefficients(projected, basis_vectors):
+    """Return coefficients of projected vector in basis_vectors."""
+    A = np.column_stack(basis_vectors)
+    return np.linalg.lstsq(A, projected, rcond=None)[0]
+
+def project_embedding(emb, v0, v1):
+    """Project emb onto (v0, v1) plane and return Cartesian (x, y)."""
+    P = projection_matrix([v0, v1])
+    projected = P @ np.array(emb)
+    a, b = projection_coefficients(projected, [v0, v1])
+
+    norm_v0, norm_v1 = np.linalg.norm(v0), np.linalg.norm(v1)
+    angle = angle_between(v0, v1)
+    x = a * norm_v0 + b * norm_v1 * np.cos(angle)
+    y = b * norm_v1 * np.sin(angle)
+    return x, y, angle
+
+def manifold_coords_v0(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
     """
     Map u into coordinates (x, y) in the plane spanned by {v0, v1},
     with v0 mapped to (-1, 1) and v1 mapped to (1, 1).
@@ -76,3 +103,19 @@ def manifold_coords(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
     y0 = np.dot((v0 - origin), e2)
     y = 1 + (y_raw - y0)
     return float(x), float(y)
+
+
+def manifold_coords_v1(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
+    """
+    Map u into coordinates (x, y) in the plane spanned by {v0, v1},
+    using Yen-Shao's method.
+    """
+    x, y, angle_v0v1 = project_embedding(u, v0, v1)
+    r = math.hypot(x, y)
+    theta = math.atan2(y, x)
+
+    normalized_r = r / 1.0
+    normalized_theta = theta / angle_v0v1
+    return normalized_theta, normalized_r
+
+

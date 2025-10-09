@@ -7,7 +7,7 @@ import dotenv
 from geometry_persuasion import (
     get_embedding, 
     get_manifold_vectors, 
-    manifold_coords,
+    manifold_coords_v1,
     generate_text
 )
 
@@ -66,8 +66,8 @@ async def compute_manifold(request: TopicRequest):
     """Compute manifold vectors for a given topic."""
     try:
         vector_0, vector_1 = get_manifold_vectors(request.topic, model='gpt-4o')
-        x0, y0 = manifold_coords(vector_0, vector_0, vector_1)
-        x1, y1 = manifold_coords(vector_1, vector_0, vector_1)
+        x0, y0 = manifold_coords_v1(vector_0, vector_0, vector_1)
+        x1, y1 = manifold_coords_v1(vector_1, vector_0, vector_1)
         
         return ManifoldResponse(
             vector_0=vector_0,
@@ -119,7 +119,7 @@ async def chat(request: ChatRequest):
                     print(f"🔍 DEBUG: User embedding length: {len(user_vector)}")
                     
                     print(f"🔍 DEBUG: Computing user manifold coordinates...")
-                    user_x, user_y = manifold_coords(
+                    user_x, user_y = manifold_coords_v1(
                         user_vector, 
                         request.manifold_data['vector_0'], 
                         request.manifold_data['vector_1']
@@ -154,7 +154,7 @@ async def chat(request: ChatRequest):
                     print(f"🔍 DEBUG: Assistant embedding length: {len(assistant_vector)}")
                     
                     print(f"🔍 DEBUG: Computing assistant manifold coordinates...")
-                    assistant_x, assistant_y = manifold_coords(
+                    assistant_x, assistant_y = manifold_coords_v1(
                         assistant_vector, 
                         request.manifold_data['vector_0'], 
                         request.manifold_data['vector_1']
