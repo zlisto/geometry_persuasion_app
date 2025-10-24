@@ -6,9 +6,9 @@ import { computeManifold, sendChatMessage } from './services/api';
 
 function App() {
   const [messages, setMessages] = useState([]);
-  const [topic, setTopic] = useState("Dunkin Donuts");
+  const [topic, setTopic] = useState("Dunkin Donuts pumpkin spice donut");
   const [systemTail, setSystemTail] = useState(
-    "You are a salesperson named Duncan trying to convince someone on a cold call to purchase the given product. Be a charismatic salesperson, ask open-ended questions, and be informative. Don't be too pushy or verbose, try to find out about the customer and see how the product would fit into their life. Limit your response to 30 words maximum."
+    "You are a salesperson named Duncan trying to convince someone on a cold call to purchase the given product. Be a charismatic salesperson, ask open-ended questions, and be informative. Don't be too pushy or verbose, try to find out about the customer and see how the product would fit into their life. Limit your response to 15 words maximum."
   );
   const [manifoldData, setManifoldData] = useState(null);
   const [conversationPoints, setConversationPoints] = useState([]);
@@ -50,19 +50,14 @@ function App() {
       };
       setMessages([systemMessage, assistantMessage]);
       
-      // Plot the initial assistant message immediately
+      // Plot the initial assistant message with its actual embedding coordinates
       if (initialResponse.conversation_points && initialResponse.conversation_points.length > 0) {
         setConversationPoints(initialResponse.conversation_points);
       } else {
-        // If no conversation points returned, create a placeholder point for the initial agent message
-        const initialAgentPoint = {
-          role: "assistant",
-          x: 0.5, // Place at center of manifold
-          y: 0.5,
-          message_index: 0,
-          message: initialResponse.response
-        };
-        setConversationPoints([initialAgentPoint]);
+        console.warn('No conversation points returned for initial assistant message');
+        // If no conversation points returned, we should still have them from the backend
+        // This shouldn't happen if the backend is working correctly
+        setConversationPoints([]);
       }
       
     } catch (error) {
@@ -190,7 +185,7 @@ function App() {
           className="left-panel" 
           style={{ width: `${leftPanelWidth}%` }}
         >
-          <h2>💬 Topic-Driven Influence Chat</h2>
+          <h2>Topic-Driven Influence Chat</h2>
           <p className="subtitle">Enter a <strong>Topic</strong>. It will be prepended to the system prompt.</p>
           
           <div className="input-section">
@@ -218,7 +213,7 @@ function App() {
               id="system-prompt"
               value={systemTail}
               onChange={(e) => setSystemTail(e.target.value)}
-              rows={4}
+              rows={6}
             />
           </div>
           
@@ -246,7 +241,7 @@ function App() {
           className="right-panel"
           style={{ width: `${100 - leftPanelWidth}%` }}
         >
-          <h2>📈 Manifold View</h2>
+          <h2>Manifold View</h2>
           <p className="subtitle">Shows topic manifold and conversation progression.</p>
           
           <ManifoldVisualization 

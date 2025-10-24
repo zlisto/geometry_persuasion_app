@@ -141,16 +141,20 @@ async def chat(request: ChatRequest):
             else:
                 print(f"🔍 DEBUG: No user messages found")
             
-            # Compute assistant conversation point
+            # Compute assistant conversation point for the newly generated response
+            # This includes both existing assistant messages and the new response
             assistant_messages = [m for m in request.messages if m.role == "assistant"]
-            if assistant_messages:
-                print(f"🔍 DEBUG: Found {len(assistant_messages)} assistant messages")
+            all_assistant_text = " ".join([m.content for m in assistant_messages])
+            
+            # Add the newly generated response to the assistant text
+            if response_text:
+                all_assistant_text = f"{all_assistant_text} {response_text}".strip()
+            
+            if all_assistant_text:
+                print(f"🔍 DEBUG: Processing assistant text (length: {len(all_assistant_text)})")
                 try:
-                    assistant_text = " ".join([m.content for m in assistant_messages])
-                    print(f"🔍 DEBUG: Assistant text length: {len(assistant_text)}")
-                    
                     print(f"🔍 DEBUG: Getting assistant embedding...")
-                    assistant_vector = get_embedding(assistant_text)
+                    assistant_vector = get_embedding(all_assistant_text)
                     print(f"🔍 DEBUG: Assistant embedding length: {len(assistant_vector)}")
                     
                     print(f"🔍 DEBUG: Computing assistant manifold coordinates...")
@@ -165,7 +169,7 @@ async def chat(request: ChatRequest):
                         x=assistant_x, 
                         y=assistant_y, 
                         role="assistant", 
-                        message_index=len(assistant_messages)
+                        message_index=len(assistant_messages)  # Start from 0 for first message
                     )
                     conversation_points.append(assistant_point)
                     print(f"🔍 DEBUG: Created assistant conversation point: {assistant_point}")
@@ -174,7 +178,7 @@ async def chat(request: ChatRequest):
                     import traceback
                     print(f"❌ ERROR: Traceback: {traceback.format_exc()}")
             else:
-                print(f"🔍 DEBUG: No assistant messages found")
+                print(f"🔍 DEBUG: No assistant text to process")
         else:
             print(f"🔍 DEBUG: No manifold data provided, skipping conversation point computation")
         
@@ -193,4 +197,4 @@ async def chat(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

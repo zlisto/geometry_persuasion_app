@@ -75,6 +75,19 @@ def project_embedding(emb, v0, v1):
     y = b * norm_v1 * np.sin(angle)
     return x, y, angle
 
+def manifold_coords_v1(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
+    """
+    Map u into coordinates (x, y) in the plane spanned by {v0, v1},
+    using Yen-Shao's method.
+    """
+    x, y, angle_v0v1 = project_embedding(u, v0, v1)
+    r = math.hypot(x, y)
+    theta = math.atan2(y, x)
+
+    normalized_r = r / 1.0
+    normalized_theta = theta / angle_v0v1
+    return x, y
+
 def manifold_coords_v0(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
     """
     Map u into coordinates (x, y) in the plane spanned by {v0, v1},
@@ -103,19 +116,3 @@ def manifold_coords_v0(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
     y0 = np.dot((v0 - origin), e2)
     y = 1 + (y_raw - y0)
     return float(x), float(y)
-
-
-def manifold_coords_v1(u: np.ndarray, v0: np.ndarray, v1: np.ndarray):
-    """
-    Map u into coordinates (x, y) in the plane spanned by {v0, v1},
-    using Yen-Shao's method.
-    """
-    x, y, angle_v0v1 = project_embedding(u, v0, v1)
-    r = math.hypot(x, y)
-    theta = math.atan2(y, x)
-
-    normalized_r = r / 1.0
-    normalized_theta = theta / angle_v0v1
-    return normalized_theta, normalized_r
-
-
